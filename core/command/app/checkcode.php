@@ -26,6 +26,7 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use OC\App\CodeChecker\Error;
 
 class CheckCode extends Command {
 	protected function configure() {
@@ -41,20 +42,28 @@ class CheckCode extends Command {
 
 	protected function execute(InputInterface $input, OutputInterface $output) {
 		$appId = $input->getArgument('app-id');
-		$codeChecker = new \OC\App\CodeChecker();
+		$codeChecker = new \OC\App\CodeChecker\CodeChecker();
 		$codeChecker->listen('CodeChecker', 'analyseFileBegin', function($params) use ($output) {
 			$output->writeln("<info>Analysing {$params}</info>");
 		});
 		$codeChecker->listen('CodeChecker', 'analyseFileFinished', function($params) use ($output) {
+			/** @var Error[] $params */
+
 			$count = count($params);
 			$output->writeln(" {$count} errors");
-			usort($params, function($a, $b) {
+			// FIXME: Make work with error class
+			/*	usort($params, function($a, $b) {
 				return $a['line'] >$b['line'];
-			});
+			});*/
 
 			foreach($params as $p) {
-				$line = sprintf("%' 4d", $p['line']);
-				$output->writeln("    <error>line $line: {$p['disallowedToken']} - {$p['reason']}</error>");
+				if($p instanceof Error) {
+					$line = sprintf("%' 4d", $p->getLine());
+					$output->writeln("    <error>line $line: {$p->getDisallowedToken()} - {$p->getMessage()}</error>");
+				} else {
+					$line = sprintf("%' 4d", $p['line']);
+					$output->writeln("    <error>line $line: {$p['disallowedToken']} - {$p['reason']}</error>");
+				}
 			}
 		});
 		$errors = $codeChecker->analyse($appId);
