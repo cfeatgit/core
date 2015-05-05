@@ -362,7 +362,7 @@ if ($_['cronErrors']) {
 			<?php
 			if ($_['encryptionReady'] === false && $_['externalBackendsEnabled'] === true) {
 				p('You need to migrate your encryption keys from the old encryption (ownCloud <= 8.0) to the new one. '
-					. 'Please enable the "ownCloud Default Encryption Module" and run \'occ encryption:migrate\'');
+					. 'Please enable the "Default encryption module" and run \'occ encryption:migrate\'');
 			} elseif ($_['encryptionReady'] === false && $_['externalBackendsEnabled'] === false) {
 				p('You need to migrate your encryption keys from the old encryption (ownCloud <= 8.0) to the new one.'); ?>
 				<input type="submit" name="startmigration" id="startmigration"
